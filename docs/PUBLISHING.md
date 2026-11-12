@@ -39,4 +39,4 @@ Track the failures people actually report: confusing startup, useful missed form
 3. 必要ならPagesのSourceをGitHub Actionsにし、手動ワークフローでデモを公開。成功後に返されたURLを使う。
 4. 公開前に対象ブラウザで直接HTMLを開いて確認。告知は実際のリンクと、架空ログの例を使う。
 
-These steps are prepared, not performed automatically. No GitHub repository, release, or public Pages URL has been created by this package.
+The original project is published at [GitHub](https://github.com/shiro-gg0711/traceveil) with its [live demo](https://shiro-gg0711.github.io/traceveil/). The instructions above also apply to a fork; substitute your own actual repository and deployment URLs. The local build does not publish anything automatically.

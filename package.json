@@ -5,6 +5,8 @@
   "type": "module",
   "private": true,
   "license": "MIT",
+  "repository": { "type": "git", "url": "https://github.com/shiro-gg0711/traceveil.git" },
+  "homepage": "https://shiro-gg0711.github.io/traceveil/",
   "engines": { "node": ">=24" },
   "bin": { "traceveil": "./cli.mjs" },
   "scripts": {

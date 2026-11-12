@@ -4,7 +4,7 @@
 
 **GitHubのIssue、チームへの相談、AIへの質問。その前にログを整える、無料のローカルツールです。**
 
-[English](README.md) · [公開手順](docs/PUBLISHING.md) · [更新履歴](CHANGELOG.md)
+[ブラウザで試す](https://shiro-gg0711.github.io/traceveil/) · [単体HTML](https://github.com/shiro-gg0711/traceveil/blob/main/dist/TraceVeil.html) · [English](README.md) · [更新履歴](CHANGELOG.md)
 
 ```text
 入力                               出力
@@ -73,8 +73,8 @@ node --test
 
 ## 公開・開発
 
-[公開手順](docs/PUBLISHING.md)に、GitHub投稿、Releaseへの単体HTML添付、Pagesの公開デモ設定をまとめました。説明文、Issueテンプレート、テスト設定、MITライセンスも同梱しています。GitHubへの投稿・npm公開・告知送信は自動では行いません。
+[ソース](https://github.com/shiro-gg0711/traceveil)と[公開デモ](https://shiro-gg0711.github.io/traceveil/)を公開しています。[公開手順](docs/PUBLISHING.md)には、自分のフォークを公開・更新する方法をまとめました。Issueテンプレート、テスト設定、MITライセンスも同梱しています。npmへの公開や告知の送信は行いません。
 
-ローカル確認はWindows・Node24・組み込みChromiumブラウザで実施しています。単体HTMLはローカルHTTP配信で検証しました。自動ブラウザは `file://` への移動を許可しないため、その環境ではファイル直接起動を確認できていません。ほかのOS向けのCI設定はありますが、実行結果を保証するものではありません。
+GitHub上のCIは、Windows・macOS・LinuxとNode.js 24／26の全6環境で成功しました。公開デモも組み込みChromiumブラウザで確認しています。単体HTMLはHTTP配信で検証済みです。自動ブラウザは `file://` への移動を許可しないため、その環境ではファイル直接起動を確認できていません。
 
 ログを伏せる既存ツールはあります。本作は、関係性を残すラベル・読み解ける共通エンジン・導入不要の単体版に重点を置いています。世界初や完全な安全性をうたうものではありません。

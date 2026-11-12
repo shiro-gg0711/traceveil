@@ -4,7 +4,7 @@
 
 **Prepare logs for GitHub issues, teammates, and AI — locally, without an account.**
 
-[日本語](README.ja.md) · [Detection limits](#what-it-catches) · [CLI](#terminal-and-library) · [Publish a demo](docs/PUBLISHING.md) · [Release notes](CHANGELOG.md)
+[Try online](https://shiro-gg0711.github.io/traceveil/) · [Portable HTML](https://github.com/shiro-gg0711/traceveil/blob/main/dist/TraceVeil.html) · [日本語](README.ja.md) · [CLI](#terminal-and-library) · [Release notes](CHANGELOG.md)
 
 ```diff
 - alice@example.test failed from 192.168.1.12
@@ -119,8 +119,8 @@ node --test
 node scripts/build.mjs
 ```
 
-CI is configured for Node 24/26 on Linux, macOS, and Windows. The release was locally verified on Windows with Node 24 and the embedded Chromium browser. Portable HTML was tested over local HTTP; direct `file://` navigation is blocked by the automated browser's policy and was not verified in that environment. Test your target browsers before advertising broader compatibility.
+CI passed on Node 24/26 on Linux, macOS, and Windows. The public demo was verified in the embedded Chromium browser. Portable HTML was tested over HTTP; direct `file://` navigation is blocked by the automated browser's policy and was not verified in that environment. Test your target browsers before advertising broader compatibility.
 
-See [publishing instructions](docs/PUBLISHING.md) for release assets and the opt-in GitHub Pages workflow. Uploading sources alone does not publish the demo: Pages needs to be enabled and the workflow run manually. No GitHub owner, repository URL, stars, or deployment success is invented in these files. The package stays `private` to prevent accidental npm publication.
+The [public demo](https://shiro-gg0711.github.io/traceveil/) is hosted with GitHub Pages. See [publishing instructions](docs/PUBLISHING.md) to publish your own fork or refresh the demo using the manual workflow. The package stays `private` to prevent accidental npm publication; this does not affect the public source repository.
 
 Help improve this: report a fictional missed example or confusing workflow using the issue templates. See [CONTRIBUTING](CONTRIBUTING.md), [security notes](SECURITY.md), and the [launch kit](docs/LAUNCH.md). MIT licensed.
