@@ -4,7 +4,7 @@
 
 **Prepare logs for GitHub issues, teammates, and AI — locally, without an account.**
 
-[Try online](https://shiro-gg0711.github.io/traceveil/) · [Portable HTML](https://github.com/shiro-gg0711/traceveil/blob/main/dist/TraceVeil.html) · [日本語](README.ja.md) · [CLI](#terminal-and-library) · [Release notes](CHANGELOG.md)
+[Try online](https://shiro-gg0711.github.io/traceveil/) · [Download HTML](https://github.com/shiro-gg0711/traceveil/releases/download/v0.2.0/TraceVeil.html) · [日本語](README.ja.md) · [CLI](#terminal-and-library) · [Release notes](CHANGELOG.md)
 
 ```diff
 - alice@example.test failed from 192.168.1.12

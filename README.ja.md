@@ -4,7 +4,7 @@
 
 **GitHubのIssue、チームへの相談、AIへの質問。その前にログを整える、無料のローカルツールです。**
 
-[ブラウザで試す](https://shiro-gg0711.github.io/traceveil/) · [単体HTML](https://github.com/shiro-gg0711/traceveil/blob/main/dist/TraceVeil.html) · [English](README.md) · [更新履歴](CHANGELOG.md)
+[ブラウザで試す](https://shiro-gg0711.github.io/traceveil/) · [単体HTMLをダウンロード](https://github.com/shiro-gg0711/traceveil/releases/download/v0.2.0/TraceVeil.html) · [English](README.md) · [更新履歴](CHANGELOG.md)
 
 ```text
 入力                               出力
