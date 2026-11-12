@@ -1,0 +1,477 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Prepare logs for GitHub issues and AI. Hide common secrets, preserve repeated identities. Free, local, no account.">
+  <meta name="color-scheme" content="light dark">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; worker-src blob:; connect-src 'none'; object-src 'none'; base-uri 'none'">
+  <title>TraceVeil — Share the trace, not the secrets.</title>
+  <style>
+:root {
+  color-scheme: light dark;
+  font-family: Inter, "Segoe UI", "Yu Gothic UI", system-ui, sans-serif;
+  --bg: #f7f9f7;
+  --surface: #fff;
+  --text: #233b33;
+  --muted: #62776d;
+  --line: #dbe5de;
+  --accent: #147557;
+  --soft: #eaf3ed;
+  background: var(--bg);
+  color: var(--text);
+}
+* { box-sizing: border-box; }
+body { max-width: 1320px; margin: auto; padding: 0 36px; }
+header, nav, .bar-actions, .editor-bar, .result-bar, .panel-title, footer { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+header { padding: 25px 0; border-bottom: 1px solid var(--line); }
+.brand { color: var(--text); font-weight: 750; font-size: 23px; letter-spacing: -1px; text-decoration: none; }
+.brand>span:last-child { color: var(--accent); }
+.brand-mark { margin-right: 7px; color: var(--accent); }
+nav { gap: 22px; }
+.local { font-size: 10px; color: var(--accent); letter-spacing: 1.3px; }
+button, .file { font: inherit; font-size: 12px; padding: 10px 15px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); color: var(--text); cursor: pointer; white-space: nowrap; }
+button:hover, .file:hover { background: var(--soft); }
+button:disabled { opacity: .45; cursor: default; }
+button:focus-visible, summary:focus-visible, a:focus-visible, .file:focus-within { outline: 3px solid #65a78a; outline-offset: 3px; }
+button.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+button.primary:not(:disabled):hover { filter: brightness(.9); }
+.quiet { border-color: transparent; background: transparent; color: var(--muted); }
+.hero { display: grid; grid-template-columns: 1fr 350px; align-items: center; gap: 60px; padding: 45px 0 35px; }
+.eyebrow { font-size: 10px; letter-spacing: 1.8px; font-weight: 650; color: var(--accent); }
+h1 { font-size: clamp(35px, 4.5vw, 60px); letter-spacing: -2px; line-height: 1.12; margin: 17px 0; }
+h1 em { color: var(--accent); font-style: normal; }
+.intro { max-width: 570px; font-size: 14px; line-height: 1.85; color: var(--muted); }
+.trust { display: flex; gap: 20px; margin-top: 20px; font-size: 11px; color: var(--muted); }
+.trust span::before { content: "✓"; margin-right: 6px; color: var(--accent); }
+.mini-example { border: 1px solid var(--line); background: var(--soft); padding: 25px; border-radius: 12px; transform: rotate(-2deg); }
+.mini-caption { display: block; font-size: 9px; letter-spacing: 1.5px; color: var(--accent); margin-bottom: 16px; }
+.mini-example code { font-size: 10px; line-height: 2.5; color: var(--muted); white-space: nowrap; }
+.mini-example code span { color: var(--accent); }
+.mini-example p { margin: 17px 0 0; font-size: 10px; color: var(--muted); }
+.editor { border: 1px solid var(--line); border-radius: 12px; background: var(--surface); overflow: hidden; box-shadow: 0 10px 40px #23452e06; }
+.editor-bar, .result-bar { padding: 15px 18px; flex-wrap: wrap; }
+.sample { border-color: #96b6a3; }
+.hint { font-size: 10px; color: var(--muted); }
+.file { position: relative; }
+.file input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.grid { display: grid; grid-template-columns: 1fr 1fr; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.panel { min-width: 0; }
+.panel+.panel { border-left: 1px solid var(--line); }
+.panel-title { padding: 17px 20px 5px; font-size: 10px; letter-spacing: .6px; color: var(--muted); }
+.panel-title>span { font-size: 10px; letter-spacing: 0; }
+textarea { display: block; width: 100%; min-height: 290px; border: 0; padding: 18px 20px; resize: vertical; font: 12px/1.85 ui-monospace, SFMono-Regular, Consolas, monospace; background: transparent; color: var(--text); tab-size: 2; }
+textarea::placeholder { color: var(--muted); opacity: .8; }
+textarea:focus { outline: 2px solid #68a68b; outline-offset: -3px; }
+.result { background: color-mix(in srgb, var(--soft) 38%, var(--surface)); }
+.result textarea { color: var(--accent); }
+#summary { font-size: 11px; color: var(--accent); }
+#message { min-height: 25px; padding-top: 8px; color: var(--accent); font-size: 12px; }
+.below-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 10px; }
+summary { cursor: pointer; font-size: 12px; line-height: 1.7; }
+details p { color: var(--muted); font-size: 12px; line-height: 1.8; }
+.custom { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 18px; }
+.custom p { font-size: 11px; }
+.custom textarea { min-height: 90px; margin-top: 15px; padding: 12px; background: var(--bg); border: 1px solid var(--line); border-radius: 5px; }
+.review-note { display: flex; gap: 13px; padding: 10px 0; }
+.note-icon { color: var(--accent); font-size: 25px; }
+h2 { font-size: 13px; margin: 0; font-weight: 650; }
+.review-note p { font-size: 11px; color: var(--muted); line-height: 1.9; margin: 9px 0 0; }
+.explainer { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 35px; border-top: 1px solid var(--line); padding-top: 25px; margin-top: 35px; }
+.explainer ol { padding-left: 18px; color: var(--muted); font-size: 11px; line-height: 2; }
+footer { font-size: 10px; color: var(--muted); padding: 30px 0; flex-wrap: wrap; }
+footer b { font-weight: 400; }
+dialog { width: min(650px, 90vw); border: 1px solid var(--line); border-radius: 12px; padding: 22px; background: var(--surface); color: var(--text); }
+dialog::backdrop { background: #172c2580; }
+dialog textarea { margin: 15px 0; border: 1px solid var(--line); }
+.dragging .editor { outline: 3px dashed var(--accent); outline-offset: 7px; }
+.sr, .skip:not(:focus) { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+.skip:focus { display: inline-block; padding: 10px; background: var(--surface); color: var(--accent); }
+@media(prefers-color-scheme: dark) {
+  :root { --bg: #13221d; --surface: #1a2c24; --text: #e2eee7; --muted: #a1b8a9; --line: #354b3f; --accent: #8ad8af; --soft: #263d30; }
+  button.primary { color: #12251a; }
+}
+@media(max-width: 1000px) {
+  .hero { grid-template-columns: 1fr 290px; gap: 25px; }
+  .mini-example { padding: 20px; }
+  .mini-example code { font-size: 9px; }
+  .editor-bar .hint { display: none; }
+}
+@media(max-width: 720px) {
+  body { padding: 0 18px; }
+  header { padding: 20px 0; }
+  .brand { font-size: 21px; }
+  nav { gap: 12px; }
+  .local { font-size: 8px; letter-spacing: .5px; }
+  .hero { display: block; padding-top: 30px; }
+  .mini-example { display: none; }
+  h1 { letter-spacing: -1px; }
+  .intro { font-size: 12px; }
+  .trust { gap: 14px; font-size: 10px; }
+  .grid, .below-grid, .explainer { grid-template-columns: 1fr; }
+  .panel+.panel { border-left: 0; border-top: 1px solid var(--line); }
+  textarea { min-height: 220px; }
+  .bar-actions { gap: 7px; flex-wrap: wrap; }
+  button, .file { font-size: 11px; padding: 9px 11px; }
+  .result-bar { gap: 15px; }
+  .below-grid { gap: 13px; }
+  .explainer { gap: 18px; }
+}
+@media(prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
+
+</style>
+</head>
+<body>
+  <a class="skip" href="#input" data-i18n="skip">Skip to editor</a>
+  <header>
+    <a class="brand" href="#" aria-label="TraceVeil"><span class="brand-mark">◒</span> Trace<span>Veil</span></a>
+    <nav><span class="local" data-i18n="local">● ON YOUR DEVICE</span><button id="language" type="button">日本語</button></nav>
+  </header>
+  <main>
+    <section class="hero">
+      <div><p class="eyebrow" data-i18n="eyebrow">FOR BUG REPORTS, TEAMMATES & AI</p>
+        <h1><span data-i18n="headline1">Share the trace.</span><br><em data-i18n="headline2">Not the secrets.</em></h1>
+        <p class="intro" data-i18n="intro">Make logs easier to share. Hide common sensitive values while keeping the relationships that help explain a bug.</p>
+        <div class="trust"><span data-i18n="trust1">No uploads</span><span data-i18n="trust2">No account</span><span data-i18n="trust3">Open source</span></div>
+      </div>
+      <aside class="mini-example" aria-label="Example">
+        <span class="mini-caption" data-i18n="exampleTitle">SAME PERSON. SAME LABEL.</span>
+        <code>alice@example.test <span>→ [EMAIL_1]</span><br>alice@example.test <span>→ [EMAIL_1]</span><br>bob@example.test <span>→ [EMAIL_2]</span></code>
+        <p data-i18n="exampleNote">Keep the context. Remove the identifying value.</p>
+      </aside>
+    </section>
+
+    <section class="editor" aria-label="Log editor">
+      <div class="editor-bar"><div class="bar-actions">
+        <button id="sample" class="sample" data-i18n="sample">Try an example</button>
+        <label class="file"><span data-i18n="file">Open file</span><input id="file" type="file" accept="text/*,.log,.json,.csv,.txt" aria-label="Open UTF-8 file"></label>
+        <button id="clear" class="quiet" data-i18n="clear">Clear all</button>
+      </div><span class="hint" data-i18n="dropHint">Paste or drop a UTF-8 text file · up to 8 MiB</span></div>
+      <div class="grid">
+        <section class="panel"><div class="panel-title"><label for="input" data-i18n="inputLabel">01 / ORIGINAL LOG</label><span id="size">0 B</span></div>
+          <textarea id="input" spellcheck="false" autocomplete="off" autocapitalize="off" placeholder="Paste a log here, or try the example above."></textarea>
+        </section>
+        <section class="panel result"><div class="panel-title"><label for="output" data-i18n="outputLabel">02 / READY TO REVIEW</label><span id="state" role="status" aria-live="polite"></span></div>
+          <textarea id="output" readonly spellcheck="false" placeholder="Your redacted log will appear here."></textarea>
+        </section>
+      </div>
+      <div class="result-bar"><span id="summary" role="status" aria-live="polite"></span><div class="bar-actions">
+        <button id="copy" class="primary" disabled data-i18n="copy">Copy result</button>
+        <button id="markdown" disabled data-i18n="markdown">Copy for GitHub</button>
+        <button id="download" disabled data-i18n="download">Save .txt</button>
+      </div></div>
+    </section>
+    <div id="message" role="status" aria-live="polite"></div>
+
+    <div class="below-grid">
+      <details class="custom" id="custom-panel"><summary data-i18n="customTitle">Also hide a name, hostname, or project identifier</summary>
+        <p id="literal-help" data-i18n="customHelp">One exact value per line. Case-sensitive; 2–256 characters each, up to 32 values. Stays in memory only.</p>
+        <label for="literals" class="sr" data-i18n="customLabel">Additional values to hide</label>
+        <textarea id="literals" rows="3" spellcheck="false" autocomplete="off" aria-describedby="literal-help" placeholder="internal-project-name&#10;my-hostname"></textarea>
+      </details>
+      <section class="review-note"><span class="note-icon">↳</span><div><h2 data-i18n="reviewTitle">One last look before sharing.</h2>
+        <p data-i18n="reviewBody">This catches known patterns, not every secret. Review the result. Repeated labels preserve equality; they are not cryptographic anonymization.</p></div></section>
+    </div>
+
+    <section class="explainer"><div><h2 data-i18n="howTitle">Three steps. No setup.</h2><ol><li data-i18n="step1">Paste a log or open a text file.</li><li data-i18n="step2">Review the result; add custom values if needed.</li><li data-i18n="step3">Copy it into your issue, chat, or AI prompt.</li></ol></div>
+      <details><summary data-i18n="detectTitle">What gets redacted?</summary><p data-i18n="detectBody">Common ASCII emails, IPv4, secret assignments, Bearer/Basic values, selected tokens, URL credentials, and complete PEM private keys. IPv6, cookies, paths, names, and custom formats are not covered automatically; add exact values above. False positives are possible.</p></details>
+      <details><summary data-i18n="privacyTitle">Where does my text go?</summary><p data-i18n="privacyBody">Redaction happens in this browser. The tool makes no log uploads and uses no analytics or persistent text storage. Clear all removes text and custom values from the interface. Your clipboard and downloaded files remain under your control.</p></details>
+    </section>
+  </main>
+  <dialog id="copy-dialog" aria-labelledby="copy-title"><h2 id="copy-title" data-i18n="manualCopy">Select the text and copy it manually.</h2><textarea id="copy-text" readonly aria-labelledby="copy-title"></textarea><button id="close-dialog" data-i18n="close">Close</button></dialog>
+  <footer><span>TraceVeil <b>0.2.0</b> · MIT · Zero dependencies</span><span data-i18n="footer">Small enough to inspect. Free to self-host.</span></footer>
+  <noscript>This tool requires JavaScript. It does not send logs to a server.</noscript>
+  <script type="module">
+/** Pure local transformation. All detectors read the original text before replacement. */
+function redact(text, { literals = [] } = {}) {
+  if (!Array.isArray(literals) || literals.length > 32 || literals.some(value =>
+    typeof value !== 'string' || [...value].length < 2 || [...value].length > 256 || /[\r\n]/.test(value))) {
+    throw new Error('Invalid literal redactions: use up to 32 single-line values of 2–256 characters.');
+  }
+  const spans = [];
+  const add = (start, end, kind) => { if (end > start) spans.push({ start, end, kind }); };
+  const whole = (pattern, kind) => {
+    for (const match of text.matchAll(pattern)) add(match.index, match.index + match[0].length, kind);
+  };
+
+  // Read PEM markers once; repeated incomplete blocks must not rescan the tail.
+  let begin;
+  for (const marker of text.matchAll(/-----(BEGIN|END) ([A-Z ]{0,40}PRIVATE KEY)-----/g)) {
+    if (marker[1] === 'BEGIN') begin = marker;
+    else if (begin && begin[2] === marker[2]) {
+      add(begin.index, marker.index + marker[0].length, 'PRIVATE_KEY'); begin = undefined;
+    }
+  }
+
+  // Bound key prefixes, and scan values without a potentially unbounded regex stack.
+  const names = '(?:[A-Z0-9_-]{1,120}[_-])?(?:api[_-]?key|access[_-]?token|refresh[_-]?token|token|password|passwd|secret|client[_-]?secret)';
+  const assignment = new RegExp(String.raw`(?<![A-Z0-9_-])${names}["']?[\t ]*[:=][\t ]*`, 'gi');
+  while (assignment.exec(text)) {
+    const first = assignment.lastIndex;
+    const quote = text[first] === '"' || text[first] === "'" ? text[first] : '';
+    const start = first + quote.length;
+    let end = start;
+    while (end < text.length && text[end] !== '\r' && text[end] !== '\n') {
+      if (quote ? text[end] === quote : /[\s,;"'}]/.test(text[end])) break;
+      if (quote && text[end] === '\\' && end + 1 < text.length && !/[\r\n]/.test(text[end + 1])) end++;
+      end++;
+    }
+    assignment.lastIndex = end;
+    if (!quote || text[end] === quote) add(start, end, 'SECRET');
+  }
+  for (const match of text.matchAll(/(\b(?:Bearer|Basic)[\t ]+)([\w.~+/=-]+)/gi)) {
+    add(match.index + match[1].length, match.index + match[0].length, 'SECRET');
+  }
+  whole(/\b(?:gh[pousr]_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,}|sk-(?:proj-)?[A-Za-z0-9_-]{20,}|AKIA[A-Z0-9]{16}|eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+)\b/g, 'TOKEN');
+  for (const match of text.matchAll(/((?<![a-z0-9+.-])[a-z][a-z0-9+.-]*:\/\/)([^\s/@]+)@/gi)) {
+    add(match.index + match[1].length, match.index + match[1].length + match[2].length, 'CREDENTIAL');
+  }
+  whole(/(?<![A-Z0-9.!#$%&'*+/?^_`{|}~-])[A-Z0-9.!#$%&'*+/?^_`{|}~-]+@[A-Z0-9](?:[A-Z0-9.-]*[A-Z0-9])?\.[A-Z]{2,}\b/gi, 'EMAIL');
+  for (const match of text.matchAll(/(?<![\w.])(?:\d{1,3}\.){3}\d{1,3}(?![\w.])/g)) {
+    if (match[0].split('.').every(part => +part <= 255)) add(match.index, match.index + match[0].length, 'IP');
+  }
+  for (const value of new Set(literals)) {
+    let pending;
+    for (let start = text.indexOf(value); start !== -1; start = text.indexOf(value, start + 1)) {
+      const end = start + value.length;
+      if (pending && start < pending.end) pending.end = end;
+      else {
+        if (pending) spans.push(pending);
+        pending = { start, end, kind: 'CUSTOM' };
+      }
+    }
+    if (pending) spans.push(pending);
+  }
+
+  const markers = [...text.matchAll(/\[(?:SECRET|TOKEN|EMAIL|IP|CREDENTIAL|PRIVATE_KEY|CUSTOM)_\d+\]/g)]
+    .map(match => ({ start: match.index, end: match.index + match[0].length }));
+  const priority = { CUSTOM: 0, PRIVATE_KEY: 1, SECRET: 2, TOKEN: 3, CREDENTIAL: 4, EMAIL: 5, IP: 6 };
+  const merged = [];
+  let markerIndex = 0;
+  for (const span of spans.sort((a, b) => a.start - b.start || b.end - a.end)) {
+    while (markers[markerIndex]?.end <= span.start) markerIndex++;
+    const marker = markers[markerIndex];
+    if (marker && (span.kind === 'CUSTOM' ? marker.start < span.end
+      : marker.start === span.start && marker.end === span.end)) continue;
+    const previous = merged.at(-1);
+    if (previous && span.start < previous.end) {
+      // An email inside URL userinfo must not expand the credential into its host.
+      // Explicit custom spans do expand overlaps, so the requested value is hidden fully.
+      const wins = priority[span.kind] < priority[previous.kind];
+      if (wins || previous.kind === 'CUSTOM' || span.kind === 'CUSTOM') previous.end = Math.max(previous.end, span.end);
+      if (wins) previous.kind = span.kind;
+    } else merged.push({ ...span });
+  }
+
+  const labels = new Map(), unique = {}, counts = {}, output = [];
+  let copied = 0;
+  for (const { start, end, kind } of merged) {
+    const value = text.slice(start, end), key = `${kind}:${value}`;
+    if (!labels.has(key)) {
+      unique[kind] = (unique[kind] || 0) + 1;
+      labels.set(key, `[${kind}_${unique[kind]}]`);
+    }
+    counts[kind] = (counts[kind] || 0) + 1;
+    output.push(text.slice(copied, start), labels.get(key), (value.match(/\r\n|\r|\n/g) || []).join(''));
+    copied = end;
+  }
+  return { text: output.join('') + text.slice(copied), counts, total: merged.length };
+}
+
+function createSession(run, show, fail = () => {}) {
+  let revision = 0;
+  return {
+    invalidate() { revision++; },
+    snapshot() { const ticket = revision; return () => ticket === revision; },
+    async submit(...args) {
+      const ticket = ++revision;
+      try {
+        const result = await run(...args);
+        if (ticket === revision) show(result);
+      } catch (error) {
+        if (ticket === revision) fail(error);
+      }
+    },
+  };
+}
+
+function markdownLog(text) {
+  let width = 3;
+  for (const match of text.matchAll(/`+/g)) width = Math.max(width, match[0].length + 1);
+  const fence = '`'.repeat(width);
+  return `${fence}text\n${text}${text.endsWith('\n') ? '' : '\n'}${fence}`;
+}
+
+
+const $ = id => document.getElementById(id);
+const limit = 8 * 1024 * 1024;
+let language = navigator.language.startsWith('ja') ? 1 : 0;
+let result = null, timer, job, workerUrl, fileRevision = 0;
+let phase = 'idle';
+
+const words = {
+  skip: ['Skip to editor', '編集欄へ移動'], local: ['● ON YOUR DEVICE', '● この端末で処理'],
+  eyebrow: ['FOR BUG REPORTS, TEAMMATES & AI', 'バグ報告・チームへの相談・AIへの質問に'],
+  headline1: ['Share the trace.', 'ログの流れは、そのまま。'], headline2: ['Not the secrets.', '見せたくない値は、伏せる。'],
+  intro: ['Make logs easier to share. Hide common sensitive values while keeping the relationships that help explain a bug.', '同じ値には、同じラベルを。メールや認証情報を伏せながら、不具合の調査に必要な関係性と改行を残します。'],
+  trust1: ['No uploads', 'アップロード不要'], trust2: ['No account', '登録不要'], trust3: ['Open source', 'ソース公開可能'],
+  exampleTitle: ['SAME PERSON. SAME LABEL.', '同じ人には、同じラベル。'],
+  exampleNote: ['Keep the context. Remove the identifying value.', '経緯を残して、個人を特定する値を伏せる。'],
+  sample: ['Try an example', 'サンプルを試す'], file: ['Open file', 'ファイルを開く'], clear: ['Clear all', 'すべて消去'],
+  dropHint: ['Paste or drop a UTF-8 text file · up to 8 MiB', '貼り付け・UTF-8ファイルをドロップ · 8 MiBまで'],
+  inputLabel: ['01 / ORIGINAL LOG', '01 / 元のログ'], outputLabel: ['02 / READY TO REVIEW', '02 / 結果を確認'],
+  inputPlaceholder: ['Paste a log here, or try the example above.', 'ログを貼り付けるか、上のサンプルで試してください。'],
+  outputPlaceholder: ['Your redacted log will appear here.', '伏せ字にしたログがここに表示されます。'],
+  copy: ['Copy result', '結果をコピー'], markdown: ['Copy for GitHub', 'GitHub用にコピー'], download: ['Save .txt', '.txtを保存'],
+  customTitle: ['Also hide a name, hostname, or project identifier', '名前・ホスト名・プロジェクト名も伏せたいとき'],
+  customHelp: ['One exact value per line. Case-sensitive; 2–256 characters each, up to 32 values. Stays in memory only.', '1行に1つ、伏せたい値を入力。大文字と小文字を区別し、各2〜256文字・32個まで。保存されません。'],
+  customLabel: ['Additional values to hide', '追加で伏せる値'],
+  reviewTitle: ['One last look before sharing.', '共有する前に、最後の確認を。'],
+  reviewBody: ['This catches known patterns, not every secret. Review the result. Repeated labels preserve equality; they are not cryptographic anonymization.', '既知の形式を検出する仕組みです。すべての秘密情報を見つけるものではありません。同じラベルから値の一致は分かるため、暗号学的な匿名化ではありません。'],
+  howTitle: ['Three steps. No setup.', '準備なしで、3ステップ。'],
+  step1: ['Paste a log or open a text file.', 'ログを貼り付けるか、ファイルを開く。'],
+  step2: ['Review the result; add custom values if needed.', '結果を確認し、必要なら伏せたい値を追加。'],
+  step3: ['Copy it into your issue, chat, or AI prompt.', 'Issue・チャット・AIへの質問にコピー。'],
+  detectTitle: ['What gets redacted?', '何を伏せられますか？'],
+  detectBody: ['Common ASCII emails, IPv4, secret assignments, Bearer/Basic values, selected tokens, URL credentials, and complete PEM private keys. IPv6, cookies, paths, names, and custom formats are not covered automatically; add exact values above. False positives are possible.', '一般的なメール、IPv4、秘密情報の代入、Bearer/Basic認証、一部のトークン、URLの認証情報、完全なPEM秘密鍵。IPv6・Cookie・パス・名前・独自形式は自動検出の対象外なので、必要な値を追加してください。誤検出もあります。'],
+  privacyTitle: ['Where does my text go?', '入力した内容はどこへ行きますか？'],
+  privacyBody: ['Redaction happens in this browser. The tool makes no log uploads and uses no analytics or persistent text storage. Clear all removes text and custom values from the interface. Your clipboard and downloaded files remain under your control.', 'このブラウザ内で処理します。ログのアップロード・アクセス解析・入力の永続保存は行いません。「すべて消去」で元のログと追加値を画面から消します。コピー済みの内容や保存ファイルは端末に残ります。'],
+  footer: ['Small enough to inspect. Free to self-host.', '読み解ける小ささ。自分の環境でも使えます。'],
+  idle: ['Waiting for a log', 'ログの入力待ち'], busy: ['Processing…', '処理中…'], ready: ['Ready to review', '確認できます'],
+  noMatches: ['No supported patterns found. Review the result.', '対応する形式は見つかりませんでした。内容を確認してください。'],
+  tooLarge: ['Input exceeds 8 MiB.', '入力は8 MiB以内にしてください。'],
+  failure: ['Could not process. Check custom values: up to 32 lines, 2–256 characters each.', '処理できませんでした。追加値は各2〜256文字、32行以内にしてください。'],
+  badFile: ['Choose one UTF-8 text file, up to 8 MiB.', '8 MiB以内のUTF-8テキストファイルを1つ選んでください。'],
+  copied: ['Copied. Review before sharing.', 'コピーしました。共有前に内容を確認してください。'],
+  saved: ['File saved through your browser.', 'ブラウザからファイルを保存しました。'],
+  cleared: ['Log and custom values cleared.', 'ログと追加値を消去しました。'],
+  manualCopy: ['Select the text and copy it manually.', '文字列を選択して、手動でコピーしてください。'], close: ['Close', '閉じる'],
+};
+const names = {
+  SECRET: ['secrets', '認証値'], TOKEN: ['tokens', 'トークン'], EMAIL: ['emails', 'メール'],
+  IP: ['IP addresses', 'IP'], CREDENTIAL: ['URL credentials', 'URL認証'], PRIVATE_KEY: ['private keys', '秘密鍵'], CUSTOM: ['custom values', '追加値'],
+};
+const t = key => words[key][language];
+function message(key) { $('message').textContent = key ? t(key) : ''; }
+function setPhase(value) { phase = value; $('state').textContent = t(value); }
+function setActions(enabled) { for (const id of ['copy', 'markdown', 'download']) $(id).disabled = !enabled; }
+function paintSummary() {
+  $('summary').textContent = result ? (result.total ? Object.entries(result.counts)
+    .map(([kind, count]) => `${names[kind][language]} ${count}`).join(' · ') : t('noMatches')) : '';
+}
+
+function cancelJob() {
+  if (job) { job.worker.terminate(); job.reject(new Error('Cancelled')); job = null; }
+}
+function run(text, options) {
+  if (!globalThis.Worker) return Promise.resolve(redact(text, options));
+  if (!workerUrl) {
+    const code = `${redact.toString()}\nonmessage=({data})=>{try{postMessage({result:redact(data.text,data.options)})}catch{postMessage({error:true})}};`;
+    workerUrl = URL.createObjectURL(new Blob([code], { type: 'text/javascript' }));
+  }
+  return new Promise((resolve, reject) => {
+    let worker;
+    try { worker = new Worker(workerUrl); }
+    catch { resolve(redact(text, options)); return; }
+    job = { worker, reject };
+    worker.onmessage = ({ data }) => {
+      worker.terminate(); if (job?.worker === worker) job = null;
+      if (data.error) reject(new Error('Processing failed')); else resolve(data.result);
+    };
+    worker.onerror = event => {
+      event.preventDefault(); worker.terminate(); if (job?.worker === worker) job = null;
+      reject(new Error('Processing failed'));
+    };
+    worker.postMessage({ text, options });
+  });
+}
+const session = createSession(run, value => {
+  result = value; $('output').value = value.text;
+  setPhase('ready'); setActions(true); paintSummary();
+}, () => { setPhase('idle'); message('failure'); });
+
+function invalidate() {
+  session.invalidate(); cancelJob(); clearTimeout(timer);
+  result = null; $('output').value = ''; setActions(false); paintSummary();
+}
+function processInput() {
+  invalidate(); message('');
+  const text = $('input').value;
+  const size = new TextEncoder().encode(text).length;
+  $('size').textContent = `${size.toLocaleString()} B`;
+  if (size > limit) { setPhase('idle'); message('tooLarge'); return; }
+  if (!text) { setPhase('idle'); return; }
+  setPhase('busy');
+  timer = setTimeout(() => {
+    const literals = $('literals').value.split(/\r\n|\n|\r/).filter(value => value.length);
+    session.submit(text, { literals });
+  }, 180);
+}
+function edit() { fileRevision++; processInput(); }
+async function openFile(file) {
+  if (!file || file.size > limit) { message('badFile'); return; }
+  const ticket = ++fileRevision;
+  invalidate(); setPhase('busy'); message('');
+  try {
+    const text = new TextDecoder('utf-8', { fatal: true }).decode(await file.arrayBuffer());
+    if (ticket !== fileRevision) return;
+    $('input').value = text; processInput();
+  } catch { if (ticket === fileRevision) { setPhase('idle'); message('badFile'); } }
+}
+
+$('input').addEventListener('input', edit);
+$('literals').addEventListener('input', edit);
+$('sample').onclick = () => {
+  $('input').value = 'INFO alice@example.test connected from 192.168.1.12\nDEBUG API_KEY="fictional-value-only"\nDEBUG Authorization: Bearer fictional-value-only\nERROR Login failed for alice@example.test\n  at authenticate (src/auth.js:42:7)\nINFO bob@example.test connected from 192.168.1.12';
+  edit();
+};
+$('clear').onclick = () => {
+  fileRevision++; invalidate();
+  $('input').value = $('literals').value = $('file').value = $('copy-text').value = '';
+  $('copy-dialog').close(); $('size').textContent = '0 B'; setPhase('idle'); message('cleared'); $('input').focus();
+};
+$('file').onchange = () => { openFile($('file').files[0]); $('file').value = ''; };
+document.addEventListener('dragover', event => {
+  if ([...event.dataTransfer.types].includes('Files')) { event.preventDefault(); document.body.classList.add('dragging'); }
+});
+document.addEventListener('dragleave', event => { if (!event.relatedTarget) document.body.classList.remove('dragging'); });
+document.addEventListener('drop', event => {
+  document.body.classList.remove('dragging');
+  if (!event.dataTransfer.files.length) return;
+  event.preventDefault();
+  if (event.dataTransfer.files.length !== 1) message('badFile'); else openFile(event.dataTransfer.files[0]);
+});
+async function copy(markdown = false) {
+  if (!result) return;
+  const isCurrent = session.snapshot();
+  const text = markdown ? markdownLog(result.text) : result.text;
+  try { await navigator.clipboard.writeText(text); if (isCurrent()) message('copied'); }
+  catch {
+    if (!isCurrent()) return;
+    $('copy-text').value = text; $('copy-dialog').showModal(); $('copy-text').focus(); $('copy-text').select();
+  }
+}
+$('copy').onclick = () => copy();
+$('markdown').onclick = () => copy(true);
+$('close-dialog').onclick = () => $('copy-dialog').close();
+$('copy-dialog').addEventListener('close', () => { $('copy-text').value = ''; });
+$('download').onclick = () => {
+  if (!result) return;
+  const url = URL.createObjectURL(new Blob([result.text], { type: 'text/plain;charset=utf-8' }));
+  const a = document.createElement('a'); a.href = url; a.download = 'traceveil-redacted.txt'; a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 10000); message('saved');
+};
+function translate() {
+  document.documentElement.lang = language ? 'ja' : 'en';
+  document.querySelectorAll('[data-i18n]').forEach(node => { node.textContent = t(node.dataset.i18n); });
+  $('language').textContent = language ? 'English' : '日本語';
+  $('input').placeholder = t('inputPlaceholder'); $('output').placeholder = t('outputPlaceholder');
+  $('file').setAttribute('aria-label', t('file')); setPhase(phase); paintSummary(); message('');
+}
+$('language').onclick = () => { language = 1 - language; translate(); };
+window.addEventListener('pagehide', () => { session.invalidate(); cancelJob(); if (workerUrl) URL.revokeObjectURL(workerUrl); workerUrl = undefined; });
+translate();
+
+</script>
+</body>
+</html>

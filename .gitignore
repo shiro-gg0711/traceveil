@@ -1,0 +1,8 @@
+node_modules/
+coverage/
+*.log
+!examples/debug.log
+*.zip
+.DS_Store
+dist/
+docs/superpowers/

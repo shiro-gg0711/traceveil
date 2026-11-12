@@ -1,0 +1,7 @@
+2026-11-09 14:30:00 INFO Request from alice@example.test at 192.168.1.12
+2026-11-09 14:30:01 DEBUG API_KEY="fake-example-only"
+2026-11-09 14:30:02 DEBUG Authorization: Bearer fake-example-only
+2026-11-09 14:30:03 ERROR Login failed for alice@example.test
+  at authenticate (src/auth.js:42:7)
+  at handleRequest (src/server.js:18:3)
+2026-11-09 14:30:04 INFO Retry from bob@example.test at 192.168.1.12

@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Prepare logs for GitHub issues and AI. Hide common secrets, preserve repeated identities. Free, local, no account.">
+  <meta name="color-scheme" content="light dark">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; worker-src blob:; connect-src 'none'; object-src 'none'; base-uri 'none'">
+  <title>TraceVeil — Share the trace, not the secrets.</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <a class="skip" href="#input" data-i18n="skip">Skip to editor</a>
+  <header>
+    <a class="brand" href="#" aria-label="TraceVeil"><span class="brand-mark">◒</span> Trace<span>Veil</span></a>
+    <nav><span class="local" data-i18n="local">● ON YOUR DEVICE</span><button id="language" type="button">日本語</button></nav>
+  </header>
+  <main>
+    <section class="hero">
+      <div><p class="eyebrow" data-i18n="eyebrow">FOR BUG REPORTS, TEAMMATES & AI</p>
+        <h1><span data-i18n="headline1">Share the trace.</span><br><em data-i18n="headline2">Not the secrets.</em></h1>
+        <p class="intro" data-i18n="intro">Make logs easier to share. Hide common sensitive values while keeping the relationships that help explain a bug.</p>
+        <div class="trust"><span data-i18n="trust1">No uploads</span><span data-i18n="trust2">No account</span><span data-i18n="trust3">Open source</span></div>
+      </div>
+      <aside class="mini-example" aria-label="Example">
+        <span class="mini-caption" data-i18n="exampleTitle">SAME PERSON. SAME LABEL.</span>
+        <code>alice@example.test <span>→ [EMAIL_1]</span><br>alice@example.test <span>→ [EMAIL_1]</span><br>bob@example.test <span>→ [EMAIL_2]</span></code>
+        <p data-i18n="exampleNote">Keep the context. Remove the identifying value.</p>
+      </aside>
+    </section>
+
+    <section class="editor" aria-label="Log editor">
+      <div class="editor-bar"><div class="bar-actions">
+        <button id="sample" class="sample" data-i18n="sample">Try an example</button>
+        <label class="file"><span data-i18n="file">Open file</span><input id="file" type="file" accept="text/*,.log,.json,.csv,.txt" aria-label="Open UTF-8 file"></label>
+        <button id="clear" class="quiet" data-i18n="clear">Clear all</button>
+      </div><span class="hint" data-i18n="dropHint">Paste or drop a UTF-8 text file · up to 8 MiB</span></div>
+      <div class="grid">
+        <section class="panel"><div class="panel-title"><label for="input" data-i18n="inputLabel">01 / ORIGINAL LOG</label><span id="size">0 B</span></div>
+          <textarea id="input" spellcheck="false" autocomplete="off" autocapitalize="off" placeholder="Paste a log here, or try the example above."></textarea>
+        </section>
+        <section class="panel result"><div class="panel-title"><label for="output" data-i18n="outputLabel">02 / READY TO REVIEW</label><span id="state" role="status" aria-live="polite"></span></div>
+          <textarea id="output" readonly spellcheck="false" placeholder="Your redacted log will appear here."></textarea>
+        </section>
+      </div>
+      <div class="result-bar"><span id="summary" role="status" aria-live="polite"></span><div class="bar-actions">
+        <button id="copy" class="primary" disabled data-i18n="copy">Copy result</button>
+        <button id="markdown" disabled data-i18n="markdown">Copy for GitHub</button>
+        <button id="download" disabled data-i18n="download">Save .txt</button>
+      </div></div>
+    </section>
+    <div id="message" role="status" aria-live="polite"></div>
+
+    <div class="below-grid">
+      <details class="custom" id="custom-panel"><summary data-i18n="customTitle">Also hide a name, hostname, or project identifier</summary>
+        <p id="literal-help" data-i18n="customHelp">One exact value per line. Case-sensitive; 2–256 characters each, up to 32 values. Stays in memory only.</p>
+        <label for="literals" class="sr" data-i18n="customLabel">Additional values to hide</label>
+        <textarea id="literals" rows="3" spellcheck="false" autocomplete="off" aria-describedby="literal-help" placeholder="internal-project-name&#10;my-hostname"></textarea>
+      </details>
+      <section class="review-note"><span class="note-icon">↳</span><div><h2 data-i18n="reviewTitle">One last look before sharing.</h2>
+        <p data-i18n="reviewBody">This catches known patterns, not every secret. Review the result. Repeated labels preserve equality; they are not cryptographic anonymization.</p></div></section>
+    </div>
+
+    <section class="explainer"><div><h2 data-i18n="howTitle">Three steps. No setup.</h2><ol><li data-i18n="step1">Paste a log or open a text file.</li><li data-i18n="step2">Review the result; add custom values if needed.</li><li data-i18n="step3">Copy it into your issue, chat, or AI prompt.</li></ol></div>
+      <details><summary data-i18n="detectTitle">What gets redacted?</summary><p data-i18n="detectBody">Common ASCII emails, IPv4, secret assignments, Bearer/Basic values, selected tokens, URL credentials, and complete PEM private keys. IPv6, cookies, paths, names, and custom formats are not covered automatically; add exact values above. False positives are possible.</p></details>
+      <details><summary data-i18n="privacyTitle">Where does my text go?</summary><p data-i18n="privacyBody">Redaction happens in this browser. The tool makes no log uploads and uses no analytics or persistent text storage. Clear all removes text and custom values from the interface. Your clipboard and downloaded files remain under your control.</p></details>
+    </section>
+  </main>
+  <dialog id="copy-dialog" aria-labelledby="copy-title"><h2 id="copy-title" data-i18n="manualCopy">Select the text and copy it manually.</h2><textarea id="copy-text" readonly aria-labelledby="copy-title"></textarea><button id="close-dialog" data-i18n="close">Close</button></dialog>
+  <footer><span>TraceVeil <b>0.2.0</b> · MIT · Zero dependencies</span><span data-i18n="footer">Small enough to inspect. Free to self-host.</span></footer>
+  <noscript>This tool requires JavaScript. It does not send logs to a server.</noscript>
+  <script type="module" src="app.mjs"></script>
+</body>
+</html>

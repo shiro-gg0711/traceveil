@@ -1,0 +1,16 @@
+{
+  "name": "traceveil",
+  "version": "0.2.0",
+  "description": "Readable logs, fewer exposed secrets. A zero-dependency local redactor.",
+  "type": "module",
+  "private": true,
+  "license": "MIT",
+  "engines": { "node": ">=24" },
+  "bin": { "traceveil": "./cli.mjs" },
+  "scripts": {
+    "test": "node --test",
+    "build": "node scripts/build.mjs",
+    "start": "node cli.mjs --web",
+    "demo": "node cli.mjs examples/debug.log"
+  }
+}

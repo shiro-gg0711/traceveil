@@ -1,0 +1,14 @@
+name: Suggest an improvement
+description: Explain the task you want TraceVeil to make easier.
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What are you trying to do?
+    validations:
+      required: true
+  - type: textarea
+    id: example
+    attributes:
+      label: Fictional example and desired outcome
+      description: No real credentials or private information.
